@@ -256,9 +256,9 @@
             <h3 style="margin-bottom: 15px;">Música de Fundo</h3>
             
             <div class="form-group">
-                <label>Link do Áudio (MP3)</label>
-                <input type="text" id="music-url" class="form-control" placeholder="https://exemplo.com/musica.mp3">
-                <small style="color: #666; font-size: 0.7rem;">Links do YouTube não funcionam diretamente. Use um link de arquivo .mp3.</small>
+                <label>Upload do Arquivo (MP3)</label>
+                <input type="file" id="music-file" class="form-control" accept="audio/mpeg,audio/mp3">
+                <small id="music-path" style="color: #999; font-size: 0.7rem;"></small>
             </div>
             
             <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
@@ -390,7 +390,7 @@
                 if(data.gallery_3) document.getElementById('path-3').textContent = "Atual: " + data.gallery_3.split('/').pop();
                 if(data.gallery_4) document.getElementById('path-4').textContent = "Atual: " + data.gallery_4.split('/').pop();
                 
-                document.getElementById('music-url').value = data.music_url || '';
+                if(data.music_url) document.getElementById('music-path').textContent = "Atual: " + data.music_url.split('/').pop();
                 document.getElementById('music-enabled').checked = data.music_enabled !== false;
 
                 window.currentGalleryUrls = data;
@@ -432,6 +432,7 @@
                 const url2 = await uploadFile('photo-file-2', 'gallery_2') || (window.currentGalleryUrls ? window.currentGalleryUrls.gallery_2 : null);
                 const url3 = await uploadFile('photo-file-3', 'gallery_3') || (window.currentGalleryUrls ? window.currentGalleryUrls.gallery_3 : null);
                 const url4 = await uploadFile('photo-file-4', 'gallery_4') || (window.currentGalleryUrls ? window.currentGalleryUrls.gallery_4 : null);
+                const musicUrl = await uploadFile('music-file', 'wedding_music') || (window.currentGalleryUrls ? window.currentGalleryUrls.music_url : null);
 
                 const settings = {
                     id: 1,
@@ -439,7 +440,7 @@
                     gallery_2: url2,
                     gallery_3: url3,
                     gallery_4: url4,
-                    music_url: document.getElementById('music-url').value,
+                    music_url: musicUrl,
                     music_enabled: document.getElementById('music-enabled').checked,
                     updated_at: new Date()
                 };

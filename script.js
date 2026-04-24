@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Iniciar música
         const music = document.getElementById('bg-music');
-        if (music) {
+        if (music && music.src && music.src !== window.location.href) {
             music.play().catch(e => console.log("Auto-play blocked, interaction needed"));
         }
 
@@ -170,10 +170,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const music = document.getElementById('bg-music');
             if (music) {
                 if (data.music_enabled === false) {
-                    music.remove(); // Remove o elemento se desativado
-                } else if (data.music_url) {
-                    music.src = data.music_url;
-                    music.load();
+                    music.pause();
+                    music.src = ""; // Remove a fonte para garantir silêncio
+                } else if (data.music_url && data.music_url.trim() !== "") {
+                    // Só atualiza se o link for diferente do atual para evitar "pulos" no áudio
+                    if (music.src !== data.music_url) {
+                        music.src = data.music_url;
+                        music.load();
+                    }
                 }
             }
         }
