@@ -202,3 +202,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+// Função Global para Download do Calendário (Apple/Outlook)
+function downloadICS() {
+    const title = "Casamento Ana e Victor";
+    const description = "Celebração do casamento de Ana e Victor no Rancho Santa Fé.";
+    const location = "Rancho Santa Fé, Campo Largo - PR";
+    const start = "20261121T160000"; // 16:00 (ajustar fuso se necessário)
+    const end = "20261122T040000";
+
+    const icsContent = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "BEGIN:VEVENT",
+        `DTSTART:${start}`,
+        `DTEND:${end}`,
+        `SUMMARY:${title}`,
+        `DESCRIPTION:${description}`,
+        `LOCATION:${location}`,
+        "END:VEVENT",
+        "END:VCALENDAR"
+    ].join("\n");
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'casamento.ics');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}

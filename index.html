@@ -78,12 +78,18 @@
                 </div>
             </div>
 
-            <!-- Add to Calendar Button -->
+            <!-- Add to Calendar Section -->
             <div style="text-align: center; margin-bottom: 25px;">
-                <a href="https://www.google.com/calendar/render?action=TEMPLATE&text=Casamento+Ana+e+Victor&dates=20261121T190000Z/20261122T040000Z&details=Celebração+do+casamento+de+Ana+e+Victor+no+Rancho+Santa+Fé.&location=Rancho+Santa+Fé,+Campo+Largo+-+PR&sf=true&output=xml" 
-                   target="_blank" class="btn-calendar">
-                    📅 Adicionar ao meu Calendário
-                </a>
+                <p style="font-size: 0.8rem; color: #888; margin-bottom: 10px;">Adicionar ao calendário:</p>
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <a href="https://www.google.com/calendar/render?action=TEMPLATE&text=Casamento+Ana+e+Victor&dates=20261121T190000Z/20261122T040000Z&details=Celebração+do+casamento+de+Ana+e+Victor+no+Rancho+Santa+Fé.&location=Rancho+Santa+Fé,+Campo+Largo+-+PR&sf=true&output=xml" 
+                       target="_blank" class="btn-calendar" style="font-size: 0.8rem; padding: 8px 15px;">
+                        Google Agenda
+                    </a>
+                    <a href="#" onclick="downloadICS(); return false;" class="btn-calendar" style="font-size: 0.8rem; padding: 8px 15px;">
+                        Apple / iPhone
+                    </a>
+                </div>
             </div>
 
             <!-- Photo Gallery Section -->
