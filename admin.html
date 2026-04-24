@@ -482,7 +482,10 @@
             const { data } = await _supabase.from('invitation_settings').select('invite_url').eq('id', 1).single();
             const url = data?.invite_url || window.location.href.replace('admin.html', 'index.html');
             const message = encodeURIComponent(`Olá! Temos um convite muito especial para você. Acesse o link para ver todos os detalhes do nosso casamento: ${url}`);
-            window.open(`https://wa.me/?text=${message}`, '_blank');
+            
+            // Usar api.whatsapp.com para maior compatibilidade com celular
+            const whatsappUrl = `https://api.whatsapp.com/send?text=${message}`;
+            window.location.href = whatsappUrl;
         }
 
         function openEditModal(index) {
