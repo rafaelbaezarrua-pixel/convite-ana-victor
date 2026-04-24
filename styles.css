@@ -191,11 +191,11 @@ h3 {
 
 .invite-logo {
     position: absolute;
-    top: 2.8%; /* Ajuste fino para a logo do SVG */
+    top: 0.8%; /* Subi para não cobrir o texto */
     left: 50%;
     transform: translateX(-50%);
-    width: 35%;
-    max-width: 400px;
+    width: 42%; /* Aumentei para cobrir melhor o fundo */
+    max-width: 450px;
     z-index: 5;
 }
 
