@@ -39,7 +39,9 @@ body.opened {
     background-color: var(--white);
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
     font-family: 'Playfair Display', serif;
 }
 
@@ -75,8 +77,8 @@ h1, h2, h3 {
     top: 0;
     width: 1px;
     height: 100%;
-    background: rgba(0,0,0,0.1);
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    background: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
     z-index: 11;
 }
 
@@ -101,7 +103,7 @@ h1, h2, h3 {
     z-index: 4;
     transition: var(--transition-slow);
     transform-origin: top;
-    border-bottom: 1px solid rgba(0,0,0,0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .envelope-wrapper.open .envelope-flap {
@@ -123,12 +125,13 @@ h1, h2, h3 {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 220px; /* Reduced for better balance */
+    width: 220px;
+    /* Reduced for better balance */
     height: auto;
     cursor: pointer;
     z-index: 20;
     transition: var(--transition-medium);
-    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
 }
 
 .wax-seal-img:hover {
@@ -182,18 +185,26 @@ h1, h2, h3 {
 
 .invite-logo {
     position: absolute;
-    top: 3%; /* Posiciona no topo do convite */
+    top: 2.5%;
+    /* Posiciona no topo do convite */
     left: 50%;
     transform: translateX(-50%);
-    width: 15%; /* Tamanho relativo à largura do convite */
-    max-width: 120px;
-    min-width: 80px;
+    width: 32%;
+    /* Aumentado para cobrir a logo do fundo */
+    max-width: 250px;
     z-index: 5;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .invite-img {
@@ -297,7 +308,7 @@ input[type="text"]:focus {
     padding: 20px;
     background: white;
     border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 table {
@@ -306,7 +317,8 @@ table {
     margin-top: 30px;
 }
 
-th, td {
+th,
+td {
     padding: 15px;
     text-align: left;
     border-bottom: 1px solid #eee;
@@ -426,7 +438,7 @@ th {
     backdrop-filter: blur(10px);
     padding: 50px 40px;
     border-radius: 24px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
     width: 100%;
     max-width: 420px;
     text-align: center;
@@ -478,7 +490,7 @@ th {
     margin-bottom: 25px;
     border-radius: 50%;
     object-fit: cover;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
     background: white;
     padding: 5px;
 }
@@ -493,23 +505,31 @@ th {
 
 /* Print Styles */
 @media print {
-    .btn-delete, .btn-report, .admin-header h1, .no-print {
+
+    .btn-delete,
+    .btn-report,
+    .admin-header h1,
+    .no-print {
         display: none !important;
     }
+
     .admin-container {
         box-shadow: none !important;
         margin: 0 !important;
         width: 100% !important;
         max-width: none !important;
     }
+
     .accordion-content {
         display: flex !important;
         flex-direction: column !important;
         gap: 5px;
     }
+
     .accordion-header::after {
         display: none;
     }
+
     body {
         background: white !important;
         padding: 0 !important;
