@@ -10,6 +10,8 @@
     --wax-seal: #c2a688;
     --transition-slow: 1s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-medium: 0.5s ease;
+    --font-title: 'Playfair Display', serif;
+    --font-body: 'Montserrat', sans-serif;
 }
 
 * {

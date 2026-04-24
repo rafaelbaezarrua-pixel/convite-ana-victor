@@ -103,6 +103,15 @@
                 window.location.reload(); // Refresh to trigger checkSession and load data
             }
         });
+
+        async function handleLogout() {
+            if (confirm('Deseja realmente sair do painel?')) {
+                const { error } = await _supabase.auth.signOut();
+                if (!error) {
+                    window.location.reload();
+                }
+            }
+        }
     </script>
 
     <div class="admin-container">
@@ -111,6 +120,9 @@
             <div style="display: flex; gap: 15px; align-items: center;">
                 <button class="btn-report" onclick="window.print()">
                     <span>📄</span> Gerar Relatório
+                </button>
+                <button class="btn-delete" style="padding: 8px 15px; font-size: 0.9rem;" onclick="handleLogout()">
+                    <span>🚪</span> Sair
                 </button>
                 <div id="total-guests" class="badge badge-success">Total: 0</div>
             </div>
