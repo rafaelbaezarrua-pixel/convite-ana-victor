@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmação de Presença - Ana e Victor</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon.png?v=2">
+    <link rel="apple-touch-icon" href="favicon.png?v=2">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            justify-content: flex-start;
+            background-color: var(--white);
+        }
+
+        #invitation-content {
+            display: block;
+            opacity: 1;
+        }
+
+        .header-logo {
+            padding: 10px 20px 20px 20px;
+            text-align: center;
+        }
+
+        .header-logo img {
+            max-width: 250px;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body class="opened">
+    <!-- Preloader -->
+    <div id="loader" class="loader-wrapper">
+        <div class="loader-content">
+            <div class="loader-initials">A & V</div>
+            <div class="loader-bar"></div>
+        </div>
+    </div>
+
+    <!-- Dynamic Background -->
+    <div class="dynamic-bg" id="dynamic-bg"></div>
+
+    <div class="container">
+        <div id="invitation-content">
+            <div class="header-logo">
+                <img src="favicon.png?v=2" alt="Logo">
+                <h1 style="margin-top: 5px; font-size: 2rem;">Confirmação de Presença</h1>
+                <p style="font-family: var(--font-body); color: #888; font-size: 0.9rem; margin-top: 10px;">
+                    Estamos muito felizes em celebrar este momento com você!
+                </p>
+            </div>
+
+            <!-- Countdown Timer -->
+            <div class="countdown-container" id="countdown">
+                <div class="countdown-item">
+                    <span class="countdown-number" id="days">00</span>
+                    <span class="countdown-label">Dias</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-number" id="hours">00</span>
+                    <span class="countdown-label">Horas</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-number" id="minutes">00</span>
+                    <span class="countdown-label">Min</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-number" id="seconds">00</span>
+                    <span class="countdown-label">Seg</span>
+                </div>
+            </div>
+
+            <div class="rsvp-section" style="max-width: 600px; padding-bottom: 40px; margin-top: 20px;">
+                <h2 style="text-align: center; margin-bottom: 10px;">Confirmar Presença</h2>
+                <p style="text-align: center; margin-bottom: 30px; color: #666; font-size: 0.9rem;">
+                    Por favor, informe seu nome e de seus acompanhantes.
+                </p>
+
+                <form id="rsvp-form">
+                    <div class="form-group">
+                        <label for="guest-name">Seu Nome Completo</label>
+                        <input type="text" id="guest-name" placeholder="Digite seu nome" required>
+                    </div>
+
+                    <div id="companions-container" class="companion-list">
+                        <!-- Companion inputs will be added here -->
+                    </div>
+
+                    <button type="button" class="btn btn-secondary" id="add-companion">
+                        + Adicionar Acompanhante
+                    </button>
+
+                    <button type="submit" class="btn">Confirmar Presença</button>
+                </form>
+            </div>
+
+            <div class="map-section" style="margin-top: 0;">
+                <div class="map-container">
+                    <iframe
+                        src="https://maps.google.com/maps?q=Rancho%20Santa%20F%C3%A9%2C%20Estrada%20Col%C3%B4nia%20Mariana%2C%20Campo%20Largo%20-%20PR%2C%2083601-000&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                        width="100%" height="250" style="border:0; border-radius: 12px;" allowfullscreen=""
+                        loading="lazy">
+                    </iframe>
+                    <div class="map-fallback">
+                        <p>O mapa foi bloqueado pelo seu navegador.</p>
+                        <a href="https://www.google.com/maps/search/?api=1&query=Rancho+Santa+Fe+Campo+Largo"
+                            target="_blank" class="btn-location"
+                            style="background: #4285F4; color: white; display: inline-flex; width: auto; margin-top: 10px;">
+                            Abrir Mapa em Nova Aba
+                        </a>
+                    </div>
+                </div>
+                <div class="location-buttons">
+                    <a href="https://www.google.com/maps/search/?api=1&query=Rancho+Santa+Fe+Campo+Largo"
+                        target="_blank" class="btn-location btn-google">
+                        <img src="maps.png" alt="Google Maps">
+                        Google Maps
+                    </a>
+                    <a href="https://waze.com/ul?q=Rancho+Santa+Fe+Campo+Largo" target="_blank"
+                        class="btn-location btn-waze">
+                        <img src="waze.png" alt="Waze">
+                        Waze
+                    </a>
+                </div>
+            </div>
+
+            <!-- Add to Calendar Section -->
+            <div style="text-align: center; margin-bottom: 60px;">
+                <p style="font-size: 0.8rem; color: #888; margin-bottom: 15px;">Adicionar ao calendário:</p>
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <a href="https://www.google.com/calendar/render?action=TEMPLATE&text=Casamento+Ana+e+Victor&dates=20261121T190000Z/20261122T040000Z&details=Celebração+do+casamento+de+Ana+e+Victor+no+Rancho+Santa+Fé.&location=Rancho+Santa+Fé,+Campo+Largo+-+PR&sf=true&output=xml"
+                        target="_blank" class="btn-calendar" style="font-size: 0.8rem; padding: 10px 20px;">
+                        Google Agenda
+                    </a>
+                    <a href="#" onclick="downloadICS(); return false;" class="btn-calendar"
+                        style="font-size: 0.8rem; padding: 10px 20px;">
+                        Apple Calendar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="confirmar.js"></script>
+</body>
+
+</html>
