@@ -159,11 +159,23 @@ document.addEventListener('DOMContentLoaded', () => {
             .single();
         
         if (data) {
+            // Galeria
             const galleryItems = document.querySelectorAll('.gallery-item img');
             if (galleryItems[0] && data.gallery_1) galleryItems[0].src = data.gallery_1;
             if (galleryItems[1] && data.gallery_2) galleryItems[1].src = data.gallery_2;
             if (galleryItems[2] && data.gallery_3) galleryItems[2].src = data.gallery_3;
             if (galleryItems[3] && data.gallery_4) galleryItems[3].src = data.gallery_4;
+
+            // Música
+            const music = document.getElementById('bg-music');
+            if (music) {
+                if (data.music_enabled === false) {
+                    music.remove(); // Remove o elemento se desativado
+                } else if (data.music_url) {
+                    music.src = data.music_url;
+                    music.load();
+                }
+            }
         }
     }
 
