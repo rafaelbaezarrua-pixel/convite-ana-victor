@@ -7,6 +7,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const companionsContainer = document.getElementById('companions-container');
 
     // Supabase Configuration
+    // Initialize countdown if elements exist
+    if (document.getElementById('days')) {
+        const weddingDate = new Date('2026-11-21T16:00:00').getTime();
+
+        const countdownInterval = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = weddingDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('days').innerText = String(days).padStart(2, '0');
+            document.getElementById('hours').innerText = String(hours).padStart(2, '0');
+            document.getElementById('minutes').innerText = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').innerText = String(seconds).padStart(2, '0');
+
+            if (distance < 0) {
+                clearInterval(countdownInterval);
+                document.getElementById('countdown').innerHTML = "O Grande Dia Chegou!";
+            }
+        }, 1000);
+    }
+
     const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY, {
         auth: { persistSession: false }
     });
@@ -23,6 +48,22 @@ document.addEventListener('DOMContentLoaded', () => {
     openBtn.addEventListener('click', (e) => {
         e.stopPropagation(); // Prevent duplicate triggers
         envelope.classList.add('open');
+        
+        // Iniciar música
+        const music = document.getElementById('bg-music');
+        if (music) {
+            music.play().catch(e => console.log("Auto-play blocked, interaction needed"));
+        }
+
+        // Disparar Confetes
+        if (typeof confetti === 'function') {
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#c2a688', '#ffffff', '#e6d5c3']
+            });
+        }
         
         // Wait for animation to finish before showing content
         setTimeout(() => {
@@ -110,6 +151,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    async function loadGallerySettings() {
+        const { data, error } = await _supabase
+            .from('invitation_settings')
+            .select('*')
+            .eq('id', 1)
+            .single();
+        
+        if (data) {
+            const galleryItems = document.querySelectorAll('.gallery-item img');
+            if (galleryItems[0] && data.gallery_1) galleryItems[0].src = data.gallery_1;
+            if (galleryItems[1] && data.gallery_2) galleryItems[1].src = data.gallery_2;
+            if (galleryItems[2] && data.gallery_3) galleryItems[2].src = data.gallery_3;
+            if (galleryItems[3] && data.gallery_4) galleryItems[3].src = data.gallery_4;
+        }
+    }
+
     // Call this to handle initial state
     renderRSVPStatus();
+    loadGallerySettings();
 });

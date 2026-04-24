@@ -28,9 +28,9 @@
         .admin-container {
             display: none;
         }
-        
-        body { 
-            display: block; 
+
+        body {
+            display: block;
             background-color: #f5f5f5;
         }
 
@@ -41,12 +41,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 2000;
         }
+
         .modal-content {
             background: white;
             padding: 30px;
@@ -56,20 +57,29 @@
             max-height: 80vh;
             overflow-y: auto;
         }
+
         .companion-edit-row {
             display: flex;
             gap: 10px;
             margin-bottom: 10px;
             align-items: center;
         }
-        .btn-save { background-color: #4CAF50; color: white; }
-        .btn-cancel { background-color: #ccc; color: white; }
+
+        .btn-save {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-cancel {
+            background-color: #ccc;
+            color: white;
+        }
     </style>
 </head>
 
 <body>
     <script src="config.js"></script>
-    
+
     <!-- Login Screen Overlay -->
     <div id="login-overlay" class="login-overlay">
         <div class="login-card">
@@ -115,7 +125,7 @@
             e.preventDefault();
             const email = document.getElementById('admin-email').value;
             const password = document.getElementById('admin-pass').value;
-            
+
             const submitBtn = loginForm.querySelector('button');
             submitBtn.disabled = true;
             submitBtn.textContent = 'Autenticando...';
@@ -149,14 +159,37 @@
         <div class="admin-header">
             <h1>Lista de Presença</h1>
             <div style="display: flex; gap: 15px; align-items: center;">
+                <button class="btn-report" onclick="openSettingsModal()" style="background-color: #34495e;">
+                    <span>⚙️</span> Configurações
+                </button>
                 <button class="btn-report" onclick="window.print()">
                     <span>📄</span> Gerar Relatório
                 </button>
                 <button class="btn-delete" style="padding: 8px 15px; font-size: 0.9rem;" onclick="handleLogout()">
                     <span>🚪</span> Sair
                 </button>
-                <div id="total-guests" class="badge badge-success">Total: 0</div>
             </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Convidados</h3>
+                <p id="stat-titulares">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Acompanhantes</h3>
+                <p id="stat-acompanhantes">0</p>
+            </div>
+            <div class="stat-card" style="border-left-color: #27ae60;">
+                <h3>Total Geral</h3>
+                <p id="stat-geral">0</p>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-box no-print">
+            <input type="text" id="admin-search" placeholder="Buscar por nome do convidado..." onkeyup="filterRSVPs()">
         </div>
 
         <table>
@@ -193,6 +226,38 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 20px;">Configurações da Galeria</h3>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Selecione as fotos (JPG/PNG) para a galeria do convite.</p>
+            <div class="form-group">
+                <label>Foto 1 (Principal)</label>
+                <input type="file" id="photo-file-1" class="form-control" accept="image/*">
+                <small id="path-1" style="color: #999; font-size: 0.7rem;"></small>
+            </div>
+            <div class="form-group">
+                <label>Foto 2</label>
+                <input type="file" id="photo-file-2" class="form-control" accept="image/*">
+                <small id="path-2" style="color: #999; font-size: 0.7rem;"></small>
+            </div>
+            <div class="form-group">
+                <label>Foto 3</label>
+                <input type="file" id="photo-file-3" class="form-control" accept="image/*">
+                <small id="path-3" style="color: #999; font-size: 0.7rem;"></small>
+            </div>
+            <div class="form-group">
+                <label>Foto 4</label>
+                <input type="file" id="photo-file-4" class="form-control" accept="image/*">
+                <small id="path-4" style="color: #999; font-size: 0.7rem;"></small>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button class="btn btn-save" onclick="saveGallerySettings()">Salvar Configurações</button>
+                <button class="btn btn-cancel" onclick="closeSettingsModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const { data: { session } } = await _supabase.auth.getSession();
@@ -203,8 +268,7 @@
 
         async function renderRSVPs() {
             const tableBody = document.getElementById('rsvp-table-body');
-            const totalBadge = document.getElementById('total-guests');
-            
+
             // Load data from Supabase
             const { data: rsvps, error } = await _supabase
                 .from('rsvps')
@@ -218,23 +282,27 @@
                 </td></tr>`;
                 return;
             }
-            let totalCount = 0;
+            let totalTitulares = rsvps.length;
+            let totalAcompanhantes = 0;
             window.allRSVPs = rsvps; // Store globally for editing
 
             if (!rsvps || rsvps.length === 0) {
                 tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px;">Nenhuma confirmação até o momento.</td></tr>';
-                totalBadge.textContent = `Total de Convidados: 0`;
+                if (document.getElementById('stat-titulares')) document.getElementById('stat-titulares').textContent = '0';
+                if (document.getElementById('stat-acompanhantes')) document.getElementById('stat-acompanhantes').textContent = '0';
+                if (document.getElementById('stat-geral')) document.getElementById('stat-geral').textContent = '0';
                 return;
             }
 
             tableBody.innerHTML = ''; // Clear current table
 
             rsvps.forEach((rsvp, index) => {
-                const groupTotal = 1 + (rsvp.companions ? rsvp.companions.length : 0);
-                totalCount += groupTotal;
+                const companionCount = rsvp.companions ? rsvp.companions.length : 0;
+                totalAcompanhantes += companionCount;
+                const groupTotal = 1 + companionCount;
 
                 const row = document.createElement('tr');
-                
+
                 // Accordion logic for companions
                 let companionsHtml = '';
                 if (rsvp.companions && rsvp.companions.length > 0) {
@@ -268,10 +336,110 @@
                 tableBody.appendChild(row);
             });
 
-            totalBadge.textContent = `Total de Convidados: ${totalCount}`;
+            // Update stats cards
+            const titElem = document.getElementById('stat-titulares');
+            const compElem = document.getElementById('stat-acompanhantes');
+            const geralElem = document.getElementById('stat-geral');
+
+            if (titElem) titElem.textContent = totalTitulares;
+            if (compElem) compElem.textContent = totalAcompanhantes;
+            if (geralElem) geralElem.textContent = totalTitulares + totalAcompanhantes;
+        }
+
+        function filterRSVPs() {
+            const query = document.getElementById('admin-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#rsvp-table-body tr');
+
+            rows.forEach(row => {
+                const name = row.cells[0].textContent.toLowerCase();
+                if (name.includes(query)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         }
 
         let currentEditId = null;
+
+        async function openSettingsModal() {
+            document.getElementById('settings-modal').style.display = 'flex';
+            const { data, error } = await _supabase
+                .from('invitation_settings')
+                .select('*')
+                .eq('id', 1)
+                .single();
+            
+            if (data) {
+                if(data.gallery_1) document.getElementById('path-1').textContent = "Atual: " + data.gallery_1.split('/').pop();
+                if(data.gallery_2) document.getElementById('path-2').textContent = "Atual: " + data.gallery_2.split('/').pop();
+                if(data.gallery_3) document.getElementById('path-3').textContent = "Atual: " + data.gallery_3.split('/').pop();
+                if(data.gallery_4) document.getElementById('path-4').textContent = "Atual: " + data.gallery_4.split('/').pop();
+                window.currentGalleryUrls = data;
+            }
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').style.display = 'none';
+        }
+
+        async function uploadFile(fileInputId, fileName) {
+            const fileInput = document.getElementById(fileInputId);
+            if (!fileInput.files || fileInput.files.length === 0) return null;
+
+            const file = fileInput.files[0];
+            const fileExt = file.name.split('.').pop();
+            const filePath = `${fileName}.${fileExt}`;
+
+            const { data, error } = await _supabase.storage
+                .from('gallery')
+                .upload(filePath, file, { upsert: true });
+
+            if (error) throw error;
+
+            const { data: { publicUrl } } = _supabase.storage
+                .from('gallery')
+                .getPublicUrl(filePath);
+
+            return publicUrl;
+        }
+
+        async function saveGallerySettings() {
+            const saveBtn = document.querySelector('#settings-modal .btn-save');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Enviando fotos...';
+
+            try {
+                const url1 = await uploadFile('photo-file-1', 'gallery_1') || (window.currentGalleryUrls ? window.currentGalleryUrls.gallery_1 : null);
+                const url2 = await uploadFile('photo-file-2', 'gallery_2') || (window.currentGalleryUrls ? window.currentGalleryUrls.gallery_2 : null);
+                const url3 = await uploadFile('photo-file-3', 'gallery_3') || (window.currentGalleryUrls ? window.currentGalleryUrls.gallery_3 : null);
+                const url4 = await uploadFile('photo-file-4', 'gallery_4') || (window.currentGalleryUrls ? window.currentGalleryUrls.gallery_4 : null);
+
+                const settings = {
+                    id: 1,
+                    gallery_1: url1,
+                    gallery_2: url2,
+                    gallery_3: url3,
+                    gallery_4: url4,
+                    updated_at: new Date()
+                };
+
+                const { error } = await _supabase
+                    .from('invitation_settings')
+                    .upsert(settings);
+
+                if (error) throw error;
+
+                alert('Galeria atualizada com sucesso!');
+                closeSettingsModal();
+            } catch (err) {
+                alert('Erro ao salvar: ' + err.message);
+                console.error(err);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Salvar Configurações';
+            }
+        }
 
         function openEditModal(index) {
             const rsvp = window.allRSVPs[index];
@@ -279,13 +447,13 @@
             document.getElementById('edit-guest-name').value = rsvp.name;
             const container = document.getElementById('edit-companions-container');
             container.innerHTML = '<h4 style="margin-top: 20px; margin-bottom: 10px;">Acompanhantes</h4>';
-            
+
             if (rsvp.companions && rsvp.companions.length > 0) {
                 rsvp.companions.forEach((comp, idx) => {
                     addCompanionField(comp);
                 });
             }
-            
+
             // Add button to add more
             const addBtn = document.createElement('button');
             addBtn.textContent = '+ Adicionar Acompanhante';
