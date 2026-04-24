@@ -6,9 +6,9 @@ if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
 
 const configContent = `// Configurações geradas automaticamente pelo Build do Vercel
 const CONFIG = {
-    SUPABASE_URL: '${process.env.SUPABASE_URL || ''}',
-    SUPABASE_KEY: '${process.env.SUPABASE_KEY || ''}',
-    ADMIN_PASSWORD: '${process.env.ADMIN_PASSWORD || 'anaevictor2024'}'
+    SUPABASE_URL: ${JSON.stringify(process.env.SUPABASE_URL || '')},
+    SUPABASE_KEY: ${JSON.stringify(process.env.SUPABASE_KEY || '')},
+    ADMIN_PASSWORD: ${JSON.stringify(process.env.ADMIN_PASSWORD || 'anaevictor2024')}
 };
 `;
 
