@@ -185,13 +185,13 @@ h3 {
 
 .invite-logo {
     position: absolute;
-    top: 2.5%;
+    top: 1%;
     /* Posiciona no topo do convite */
     left: 50%;
     transform: translateX(-50%);
-    width: 32%;
+    width: 35%;
     /* Aumentado para cobrir a logo do fundo */
-    max-width: 250px;
+    max-width: 400px;
     z-index: 5;
 }
 
