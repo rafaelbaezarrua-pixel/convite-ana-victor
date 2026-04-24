@@ -43,43 +43,64 @@
     <div id="login-overlay" class="login-overlay">
         <div class="login-card">
             <img src="favicon.png" alt="Logo" class="login-logo" onerror="this.src='selo.png'">
-            <h2>Acesso Restrito</h2>
+            <h2>Acesso Administrativo</h2>
             <form id="login-form">
                 <div class="form-group">
-                    <label for="admin-pass">Senha de Acesso</label>
-                    <input type="password" id="admin-pass" placeholder="Digite a senha" required>
+                    <label for="admin-email">E-mail</label>
+                    <input type="email" id="admin-email" placeholder="seu@email.com" required>
                 </div>
-                <button type="submit" class="btn">Entrar no Painel</button>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="admin-pass">Senha</label>
+                    <input type="password" id="admin-pass" placeholder="Sua senha" required>
+                </div>
+                <button type="submit" class="btn" style="margin-top: 25px;">Entrar no Painel</button>
             </form>
-            <p id="login-error" style="color: #ff4444; margin-top: 15px; display: none;">Senha incorreta. Tente novamente.</p>
+            <p id="login-error" style="color: #ff4444; margin-top: 15px; display: none;">E-mail ou senha incorretos.</p>
         </div>
     </div>
 
     <script>
-        // Check session storage first
-        if (sessionStorage.getItem('admin_authenticated') === 'true') {
-            document.getElementById('login-overlay').style.display = 'none';
-            setTimeout(() => {
-                const adminContainer = document.querySelector('.admin-container');
-                if (adminContainer) adminContainer.style.display = 'block';
-            }, 10);
+        // Supabase Configuration with Auth
+        const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY, {
+            auth: { persistSession: true }
+        });
+
+        // Check if session exists
+        async function checkSession() {
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (session) {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.querySelector('.admin-container').style.display = 'block';
+                renderRSVPs();
+            }
         }
+
+        checkSession();
 
         const loginForm = document.getElementById('login-form');
         const loginError = document.getElementById('login-error');
 
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const email = document.getElementById('admin-email').value;
             const password = document.getElementById('admin-pass').value;
+            
+            const submitBtn = loginForm.querySelector('button');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Autenticando...';
 
-            if (password === CONFIG.ADMIN_PASSWORD) {
-                sessionStorage.setItem('admin_authenticated', 'true');
-                document.getElementById('login-overlay').style.display = 'none';
-                document.querySelector('.admin-container').style.display = 'block';
-                renderRSVPs();
-            } else {
+            const { data, error } = await _supabase.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
+
+            if (error) {
+                loginError.textContent = error.message === 'Invalid login credentials' ? 'E-mail ou senha incorretos.' : error.message;
                 loginError.style.display = 'block';
-                document.getElementById('admin-pass').value = '';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Entrar no Painel';
+            } else {
+                window.location.reload(); // Refresh to trigger checkSession and load data
             }
         });
     </script>
@@ -112,13 +133,9 @@
     </div>
 
     <script>
-        // Supabase Configuration
-        const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY, {
-            auth: { persistSession: false }
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            if (sessionStorage.getItem('admin_authenticated') === 'true') {
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (session) {
                 renderRSVPs();
             }
         });
