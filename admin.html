@@ -31,16 +31,47 @@
 
 <body>
     <script src="config.js"></script>
-    <script>
-        // Basic security to prevent unauthorized access
-        const entry = prompt('Digite a senha de administrador para acessar a lista:');
+    
+    <!-- Login Screen Overlay -->
+    <div id="login-overlay" class="login-overlay">
+        <div class="login-card">
+            <img src="favicon.png" alt="Logo" class="login-logo" onerror="this.src='selo.png'">
+            <h2>Acesso Restrito</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="admin-pass">Senha de Acesso</label>
+                    <input type="password" id="admin-pass" placeholder="Digite a senha" required>
+                </div>
+                <button type="submit" class="btn">Entrar no Painel</button>
+            </form>
+            <p id="login-error" style="color: #ff4444; margin-top: 15px; display: none;">Senha incorreta. Tente novamente.</p>
+        </div>
+    </div>
 
-        if (entry === CONFIG.ADMIN_PASSWORD) {
+    <script>
+        // Check session storage first
+        if (sessionStorage.getItem('admin_authenticated') === 'true') {
+            document.getElementById('login-overlay').style.display = 'none';
             document.body.style.display = 'block';
-        } else {
-            alert('Acesso negado!');
-            window.location.href = 'index.html';
         }
+
+        const loginForm = document.getElementById('login-form');
+        const loginError = document.getElementById('login-error');
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const password = document.getElementById('admin-pass').value;
+
+            if (password === CONFIG.ADMIN_PASSWORD) {
+                sessionStorage.setItem('admin_authenticated', 'true');
+                document.getElementById('login-overlay').style.display = 'none';
+                document.body.style.display = 'block';
+                renderRSVPs();
+            } else {
+                loginError.style.display = 'block';
+                document.getElementById('admin-pass').value = '';
+            }
+        });
     </script>
 
     <div class="admin-container">
@@ -77,7 +108,9 @@
         });
 
         document.addEventListener('DOMContentLoaded', () => {
-            renderRSVPs();
+            if (sessionStorage.getItem('admin_authenticated') === 'true') {
+                renderRSVPs();
+            }
         });
 
         async function renderRSVPs() {
