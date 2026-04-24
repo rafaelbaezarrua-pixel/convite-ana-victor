@@ -639,6 +639,15 @@ iframe:invalid + .map-fallback {
     margin-bottom: 40px;
     padding-bottom: 20px;
     border-bottom: 2px solid #f0f0f0;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.admin-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .admin-header h1 {
@@ -878,5 +887,124 @@ th {
 @media (max-width: 480px) {
     .wax-seal-img {
         width: 220px;
+    }
+}
+/* Media query for mobile adjustments */
+@media (max-width: 768px) {
+    .admin-container {
+        padding: 20px 15px;
+    }
+
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .admin-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .admin-actions {
+        width: 100%;
+        gap: 10px;
+    }
+
+    .admin-actions button {
+        flex: 1;
+        min-width: 140px;
+        justify-content: center;
+        font-size: 0.8rem;
+        padding: 8px 12px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    /* Responsive Table to Cards */
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    tr {
+        border: 1px solid #eee;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        padding: 10px;
+    }
+
+    td {
+        border: none;
+        border-bottom: 1px solid #f9f9f9;
+        position: relative;
+        padding-left: 40% !important;
+        text-align: right !important;
+        min-height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    td:last-child {
+        border-bottom: 0;
+        justify-content: center;
+        padding-left: 10px !important;
+        text-align: center !important;
+        gap: 10px;
+    }
+
+    td:before {
+        position: absolute;
+        left: 10px;
+        width: 35%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: 600;
+        color: #888;
+        font-size: 0.8rem;content: attr(data-label);
+    }
+
+    .accordion-header {
+        justify-content: flex-end;
+    }
+
+    .accordion-content {
+        text-align: left;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .login-card {
+        padding: 30px 20px;
+    }
+
+    .login-card h2 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .wax-seal-img {
+        width: 180px;
+    }
+    
+    .admin-actions button {
+        width: 100%;
+        flex: none;
     }
 }
