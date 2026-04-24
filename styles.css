@@ -169,7 +169,6 @@ h3 {
 /* Full Invitation Section (Hidden initially) */
 #invitation-content {
     display: none;
-    position: relative;
     opacity: 0;
     width: 100%;
     max-width: 100%;
@@ -183,14 +182,19 @@ h3 {
     animation-delay: 0.5s;
 }
 
+.invite-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    max-width: 800px; /* Limite de largura para não esticar demais */
+}
+
 .invite-logo {
     position: absolute;
-    top: 1%;
-    /* Posiciona no topo do convite */
+    top: 2.8%; /* Ajuste fino para a logo do SVG */
     left: 50%;
     transform: translateX(-50%);
     width: 35%;
-    /* Aumentado para cobrir a logo do fundo */
     max-width: 400px;
     z-index: 5;
 }
