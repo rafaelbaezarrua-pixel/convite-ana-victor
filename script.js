@@ -186,4 +186,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Call this to handle initial state
     renderRSVPStatus();
     loadGallerySettings();
+
+    // Pausar música ao sair da aba/navegador
+    document.addEventListener('visibilitychange', () => {
+        const music = document.getElementById('bg-music');
+        if (music) {
+            if (document.hidden) {
+                music.pause();
+            } else {
+                // Só volta a tocar se o convite já tiver sido aberto
+                if (document.body.classList.contains('opened')) {
+                    music.play().catch(e => console.log("Playback resumed"));
+                }
+            }
+        }
+    });
 });
