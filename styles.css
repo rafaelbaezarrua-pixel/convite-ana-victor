@@ -426,7 +426,7 @@ th {
     color: var(--primary);
     font-family: var(--font-title);
     font-size: 2rem;
-    font-weight: 400;
+    font-weight: 700;
 }
 
 .login-card .form-group {
