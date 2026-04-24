@@ -7,7 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const companionsContainer = document.getElementById('companions-container');
 
     // Supabase Configuration
-    const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+    const _supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY, {
+        auth: { persistSession: false }
+    });
 
     // Gift List URL
     const GIFT_LIST_URL = 'https://site.lejour.com.br/lista-de-presentes/ana-e-victor261121';
