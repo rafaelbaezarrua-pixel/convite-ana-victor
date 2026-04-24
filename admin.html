@@ -33,6 +33,37 @@
             display: block; 
             background-color: #f5f5f5;
         }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .companion-edit-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .btn-save { background-color: #4CAF50; color: white; }
+        .btn-cancel { background-color: #ccc; color: white; }
     </style>
 </head>
 
@@ -144,6 +175,24 @@
         </table>
     </div>
 
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Editar Convidado</h3>
+            <div class="form-group">
+                <label>Nome do Titular</label>
+                <input type="text" id="edit-guest-name" class="form-control">
+            </div>
+            <div id="edit-companions-container">
+                <!-- Companion fields will be added here -->
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-save" onclick="saveEdits()">Salvar</button>
+                <button class="btn btn-cancel" onclick="closeModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const { data: { session } } = await _supabase.auth.getSession();
@@ -169,8 +218,8 @@
                 </td></tr>`;
                 return;
             }
-
             let totalCount = 0;
+            window.allRSVPs = rsvps; // Store globally for editing
 
             if (!rsvps || rsvps.length === 0) {
                 tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px;">Nenhuma confirmação até o momento.</td></tr>';
@@ -180,7 +229,7 @@
 
             tableBody.innerHTML = ''; // Clear current table
 
-            rsvps.forEach((rsvp) => {
+            rsvps.forEach((rsvp, index) => {
                 const groupTotal = 1 + (rsvp.companions ? rsvp.companions.length : 0);
                 totalCount += groupTotal;
 
@@ -197,7 +246,6 @@
                             ${rsvp.companions.map((c, cIndex) => `
                                 <span class="companion-tag">
                                     ${c} 
-                                    <span class="no-print" style="cursor:pointer; color:#ff4444; margin-left:5px; font-weight:bold;" onclick="deleteCompanion(${rsvp.id}, ${cIndex})">×</span>
                                 </span>`).join('')}
                         </div>
                     `;
@@ -210,16 +258,81 @@
                 row.innerHTML = `
                     <td style="font-weight: 600;">${rsvp.name}</td>
                     <td>${companionsHtml}</td>
-                    <td style="font-size: 0.85rem;">${dateDisplay}</td>
-                    <td><span class="badge badge-success">${groupTotal}</span></td>
+                    <td>${dateDisplay}</td>
+                    <td style="text-align: center; font-weight: 700;">${groupTotal}</td>
                     <td class="no-print">
-                        <button class="btn-delete" onclick="deleteRSVP(${rsvp.id})">Excluir Tudo</button>
+                        <button class="btn-report" style="padding: 5px 10px; font-size: 0.8rem; background-color: #f39c12;" onclick="openEditModal(${index})">Editar</button>
+                        <button class="btn-delete" style="padding: 5px 10px; font-size: 0.8rem;" onclick="deleteRSVP(${rsvp.id})">Excluir</button>
                     </td>
                 `;
                 tableBody.appendChild(row);
             });
 
             totalBadge.textContent = `Total de Convidados: ${totalCount}`;
+        }
+
+        let currentEditId = null;
+
+        function openEditModal(index) {
+            const rsvp = window.allRSVPs[index];
+            currentEditId = rsvp.id;
+            document.getElementById('edit-guest-name').value = rsvp.name;
+            const container = document.getElementById('edit-companions-container');
+            container.innerHTML = '<h4 style="margin-top: 20px; margin-bottom: 10px;">Acompanhantes</h4>';
+            
+            if (rsvp.companions && rsvp.companions.length > 0) {
+                rsvp.companions.forEach((comp, idx) => {
+                    addCompanionField(comp);
+                });
+            }
+            
+            // Add button to add more
+            const addBtn = document.createElement('button');
+            addBtn.textContent = '+ Adicionar Acompanhante';
+            addBtn.className = 'btn';
+            addBtn.style.padding = '5px 10px';
+            addBtn.style.fontSize = '0.8rem';
+            addBtn.style.width = 'auto';
+            addBtn.style.background = '#3498db';
+            addBtn.onclick = () => addCompanionField('');
+            container.appendChild(addBtn);
+
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+
+        function addCompanionField(value) {
+            const container = document.getElementById('edit-companions-container');
+            const div = document.createElement('div');
+            div.className = 'companion-edit-row';
+            div.innerHTML = `
+                <input type="text" value="${value}" class="form-control edit-comp-input" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <button class="btn-delete" style="padding: 5px 10px; background: #e74c3c;" onclick="this.parentElement.remove()">×</button>
+            `;
+            // Insert before the "Add" button
+            const addBtn = container.querySelector('button');
+            container.insertBefore(div, addBtn);
+        }
+
+        function closeModal() {
+            document.getElementById('edit-modal').style.display = 'none';
+        }
+
+        async function saveEdits() {
+            const newName = document.getElementById('edit-guest-name').value;
+            const compInputs = document.querySelectorAll('.edit-comp-input');
+            const newCompanions = Array.from(compInputs).map(input => input.value).filter(val => val.trim() !== '');
+
+            const { error } = await _supabase
+                .from('rsvps')
+                .update({ name: newName, companions: newCompanions })
+                .eq('id', currentEditId);
+
+            if (error) {
+                alert('Erro ao salvar: ' + error.message);
+            } else {
+                closeModal();
+                renderRSVPs();
+            }
         }
 
         function toggleAccordion(element) {

@@ -303,12 +303,30 @@ input[type="text"]:focus {
 
 /* Admin Dashboard Styling */
 .admin-container {
-    max-width: 1000px;
-    margin: 50px auto;
-    padding: 20px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    width: 100vw;
+    min-height: 100vh;
+    padding: 40px;
+    background: #fdfdfd;
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.admin-header h1 {
+    font-family: var(--font-title);
+    color: var(--primary);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
 }
 
 table {
