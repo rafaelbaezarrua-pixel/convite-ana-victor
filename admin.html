@@ -92,7 +92,7 @@
                 </div>
                 <div class="form-group" style="margin-top: 15px;">
                     <label for="admin-pass">Senha</label>
-                    <input type="password" id="admin-pass" placeholder="Sua senha" required>
+                    <input type="password" id="admin-pass" placeholder="Sua senha" required autocomplete="current-password">
                 </div>
                 <button type="submit" class="btn" style="margin-top: 25px;">Entrar no Painel</button>
             </form>
@@ -509,6 +509,7 @@
             addBtn.style.fontSize = '0.8rem';
             addBtn.style.width = 'auto';
             addBtn.style.background = '#3498db';
+            addBtn.id = 'add-companion-btn';
             addBtn.onclick = () => addCompanionField('');
             container.appendChild(addBtn);
 
@@ -523,8 +524,8 @@
                 <input type="text" value="${value}" class="form-control edit-comp-input" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                 <button class="btn-delete" style="padding: 5px 10px; background: #e74c3c;" onclick="this.parentElement.remove()">×</button>
             `;
-            // Insert before the "Add" button
-            const addBtn = container.querySelector('button');
+            // Insert before the "Add" button if it exists
+            const addBtn = container.querySelector('#add-companion-btn');
             container.insertBefore(div, addBtn);
         }
 
