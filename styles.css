@@ -186,16 +186,19 @@ h3 {
     position: relative;
     display: inline-block;
     width: 100%;
-    max-width: 800px; /* Limite de largura para não esticar demais */
+    max-width: 800px;
+    /* Limite de largura para não esticar demais */
 }
 
 .invite-logo {
     position: absolute;
-    top: 0.8%; /* Subi para não cobrir o texto */
+    top: 0.8%;
+    /* Subi para não cobrir o texto */
     left: 50%;
     transform: translateX(-50%);
-    width: 42%; /* Aumentei para cobrir melhor o fundo */
-    max-width: 450px;
+    width: 35%;
+    /* Aumentei para cobrir melhor o fundo */
+    max-width: 300px;
     z-index: 5;
 }
 
