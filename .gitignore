@@ -1,0 +1,5 @@
+# Ignorar arquivos de configuração com chaves sensíveis
+config.js
+.env
+node_modules/
+.DS_Store

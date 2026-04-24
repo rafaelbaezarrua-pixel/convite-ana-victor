@@ -1,0 +1,418 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Montserrat:wght@100..900&display=swap');
+
+:root {
+    --primary: #c2a688;
+    --primary-dark: #a88d6d;
+    --bg-color: #e5e0d8;
+    --text-color: #5d4a3a;
+    --white: #ffffff;
+    --envelope-color: #d8cebf;
+    --wax-seal: #c2a688;
+    --transition-slow: 1s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-medium: 0.5s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+body.opened {
+    justify-content: flex-start;
+    background-color: var(--white);
+}
+
+h1, h2, h3 {
+    font-family: 'Playfair Display', serif;
+}
+
+.container {
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    perspective: 1500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Envelope Styling */
+.envelope-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(to right, #d8cebf 50%, #c8bea6 50%, #d8cebf 51%);
+    cursor: pointer;
+    transition: var(--transition-medium);
+    z-index: 10;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.envelope-wrapper::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 1px;
+    height: 100%;
+    background: rgba(0,0,0,0.1);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    z-index: 11;
+}
+
+.envelope-wrapper:hover {
+    transform: scale(1.02);
+}
+
+/* We'll change the animation logic to a split opening or just a reveal */
+.envelope-wrapper.open {
+    transform: scale(0.8) translateY(-100px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.envelope-flap {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--envelope-color);
+    clip-path: polygon(0 0, 100% 0, 50% 50%);
+    z-index: 4;
+    transition: var(--transition-slow);
+    transform-origin: top;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.envelope-wrapper.open .envelope-flap {
+    transform: rotateX(180deg);
+    z-index: 0;
+}
+
+.envelope-front {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: var(--envelope-color);
+    clip-path: polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%);
+    z-index: 3;
+}
+
+.wax-seal-img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 280px; /* Adjusted to include the text in the image */
+    height: auto;
+    cursor: pointer;
+    z-index: 20;
+    transition: var(--transition-medium);
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+}
+
+.wax-seal-img:hover {
+    transform: translate(-50%, -50%) scale(1.05);
+}
+
+.envelope-wrapper.open .wax-seal-img {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Invitation Card */
+.invitation-card {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    background-color: white;
+    z-index: 2;
+    transition: var(--transition-slow);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    transform: translateY(0);
+}
+
+.envelope-wrapper.open .invitation-card {
+    transform: translateY(-150px);
+}
+
+/* Full Invitation Section (Hidden initially) */
+#invitation-content {
+    display: none;
+    opacity: 0;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 0;
+    background: var(--white);
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    text-align: center;
+    animation: fadeIn 1s forwards;
+    animation-delay: 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.invite-img {
+    width: 100%;
+    height: auto;
+    margin-bottom: 0;
+    border: none;
+    display: block;
+}
+
+/* RSVP Form */
+.rsvp-section {
+    margin-top: 0;
+    padding: 40px 20px;
+    width: 100%;
+    max-width: 500px;
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: inherit;
+    transition: var(--transition-medium);
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.1);
+}
+
+.btn {
+    background-color: var(--primary);
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-family: inherit;
+    transition: var(--transition-medium);
+    width: 100%;
+    margin-top: 10px;
+}
+
+.btn:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    margin-bottom: 15px;
+}
+
+.btn-secondary:hover {
+    background-color: rgba(197, 160, 89, 0.05);
+}
+
+.companion-list {
+    margin-bottom: 20px;
+}
+
+.companion-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.remove-companion {
+    background: none;
+    border: none;
+    color: #ff4444;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+/* Admin Dashboard Styling */
+.admin-container {
+    max-width: 1000px;
+    margin: 50px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+th {
+    background-color: #f9f9f9;
+    font-weight: 600;
+}
+
+.badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+/* Accordion Styles */
+.accordion-header {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.accordion-header::after {
+    content: '▼';
+    font-size: 0.7rem;
+    transition: transform 0.3s;
+}
+
+.accordion-header.active::after {
+    transform: rotate(180deg);
+}
+
+.accordion-content {
+    display: none;
+    padding: 10px 0;
+    margin-top: 5px;
+    border-top: 1px dashed #ddd;
+}
+
+.accordion-content.show {
+    display: block;
+}
+
+.companion-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin: 2px;
+}
+
+/* Delete Button */
+.btn-delete {
+    background: #fff0f0;
+    color: #ff4444;
+    border: 1px solid #ffcccc;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.btn-delete:hover {
+    background: #ff4444;
+    color: white;
+}
+
+/* Report Button */
+.btn-report {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Print Styles */
+@media print {
+    .btn-delete, .btn-report, .admin-header h1, .no-print {
+        display: none !important;
+    }
+    .admin-container {
+        box-shadow: none !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+    }
+    .accordion-content {
+        display: block !important;
+    }
+    .accordion-header::after {
+        display: none;
+    }
+    body {
+        background: white !important;
+        padding: 0 !important;
+    }
+}
+
+/* Media query for mobile adjustments if needed, but keeping it full screen */
+@media (max-width: 480px) {
+    .wax-seal-img {
+        width: 220px;
+    }
+}
