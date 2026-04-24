@@ -24,9 +24,14 @@
             margin-bottom: 30px;
         }
 
-        /* Hide body until authenticated */
-        body {
+        /* Admin container hidden by default */
+        .admin-container {
             display: none;
+        }
+        
+        body { 
+            display: block; 
+            background-color: #f5f5f5;
         }
     </style>
 </head>
@@ -54,7 +59,10 @@
         // Check session storage first
         if (sessionStorage.getItem('admin_authenticated') === 'true') {
             document.getElementById('login-overlay').style.display = 'none';
-            document.body.style.display = 'block';
+            setTimeout(() => {
+                const adminContainer = document.querySelector('.admin-container');
+                if (adminContainer) adminContainer.style.display = 'block';
+            }, 10);
         }
 
         const loginForm = document.getElementById('login-form');
@@ -67,7 +75,7 @@
             if (password === CONFIG.ADMIN_PASSWORD) {
                 sessionStorage.setItem('admin_authenticated', 'true');
                 document.getElementById('login-overlay').style.display = 'none';
-                document.body.style.display = 'block';
+                document.querySelector('.admin-container').style.display = 'block';
                 renderRSVPs();
             } else {
                 loginError.style.display = 'block';
