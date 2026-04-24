@@ -166,6 +166,7 @@ h1, h2, h3 {
 /* Full Invitation Section (Hidden initially) */
 #invitation-content {
     display: none;
+    position: relative;
     opacity: 0;
     width: 100%;
     max-width: 100%;
@@ -177,6 +178,17 @@ h1, h2, h3 {
     text-align: center;
     animation: fadeIn 1s forwards;
     animation-delay: 0.5s;
+}
+
+.invite-logo {
+    position: absolute;
+    top: 3%; /* Posiciona no topo do convite */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 15%; /* Tamanho relativo à largura do convite */
+    max-width: 120px;
+    min-width: 80px;
+    z-index: 5;
 }
 
 @keyframes fadeIn {
