@@ -90,8 +90,10 @@
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error('Error fetching RSVPs:', error);
-                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: red;">Erro ao carregar dados do banco.</td></tr>';
+                console.error('Erro completo do Supabase:', error);
+                tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 40px; color: red;">
+                    Erro ao carregar dados: ${error.message || 'Verifique as chaves e as permissões RLS no Supabase.'}
+                </td></tr>`;
                 return;
             }
 
