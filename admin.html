@@ -159,6 +159,9 @@
         <div class="admin-header">
             <h1>Lista de Presença</h1>
             <div style="display: flex; gap: 15px; align-items: center;">
+                <button class="btn-report" onclick="shareWhatsApp()" style="background-color: #25D366; border-color: #25D366;">
+                    <span>📱</span> Compartilhar WhatsApp
+                </button>
                 <button class="btn-report" onclick="openSettingsModal()" style="background-color: #34495e;">
                     <span>⚙️</span> Configurações
                 </button>
@@ -229,8 +232,14 @@
     <!-- Settings Modal -->
     <div id="settings-modal" class="modal-overlay">
         <div class="modal-content">
-            <h3 style="margin-bottom: 20px;">Configurações da Galeria</h3>
-            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Selecione as fotos (JPG/PNG) para a galeria do convite.</p>
+            <div class="form-group">
+                <label>Link Oficial do Convite (Vercel)</label>
+                <input type="text" id="invite-url" class="form-control" placeholder="https://seu-convite.vercel.app">
+                <small style="color: #666; font-size: 0.7rem;">Este link será usado no botão de compartilhar pelo WhatsApp.</small>
+            </div>
+
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+            <h3 style="margin-bottom: 15px;">Galeria de Fotos</h3>
             <div class="form-group">
                 <label>Foto 1 (Principal)</label>
                 <input type="file" id="photo-file-1" class="form-control" accept="image/*">
@@ -385,12 +394,10 @@
                 .single();
             
             if (data) {
-                if(data.gallery_1) document.getElementById('path-1').textContent = "Atual: " + data.gallery_1.split('/').pop();
-                if(data.gallery_2) document.getElementById('path-2').textContent = "Atual: " + data.gallery_2.split('/').pop();
-                if(data.gallery_3) document.getElementById('path-3').textContent = "Atual: " + data.gallery_3.split('/').pop();
-                if(data.gallery_4) document.getElementById('path-4').textContent = "Atual: " + data.gallery_4.split('/').pop();
+                document.getElementById('photo-url-4').value = data.gallery_4 || '';
+                document.getElementById('invite-url').value = data.invite_url || '';
                 
-                if(data.music_url) document.getElementById('music-path').textContent = "Atual: " + data.music_url.split('/').pop();
+                document.getElementById('music-path').textContent = data.music_url ? "Atual: " + data.music_url.split('/').pop() : "";
                 document.getElementById('music-enabled').checked = data.music_enabled !== false;
 
                 window.currentGalleryUrls = data;
@@ -442,6 +449,7 @@
                     gallery_4: url4,
                     music_url: musicUrl,
                     music_enabled: document.getElementById('music-enabled').checked,
+                    invite_url: document.getElementById('invite-url').value,
                     updated_at: new Date()
                 };
 
@@ -460,6 +468,13 @@
                 saveBtn.disabled = false;
                 saveBtn.textContent = 'Salvar Configurações';
             }
+        }
+
+        async function shareWhatsApp() {
+            const { data } = await _supabase.from('invitation_settings').select('invite_url').eq('id', 1).single();
+            const url = data?.invite_url || window.location.href.replace('admin.html', 'index.html');
+            const message = encodeURIComponent(`Olá! Temos um convite muito especial para você. Acesse o link para ver todos os detalhes do nosso casamento: ${url}`);
+            window.open(`https://wa.me/?text=${message}`, '_blank');
         }
 
         function openEditModal(index) {

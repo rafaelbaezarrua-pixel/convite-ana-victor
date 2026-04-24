@@ -15,8 +15,24 @@
 </head>
 
 <body>
+    <!-- Preloader -->
+    <div id="loader" class="loader-wrapper">
+        <div class="loader-content">
+            <div class="loader-initials">A & V</div>
+            <div class="loader-bar"></div>
+        </div>
+    </div>
+
+    <!-- Dynamic Background -->
+    <div class="dynamic-bg" id="dynamic-bg"></div>
+
+    <!-- Floating Music Toggle -->
+    <button id="music-toggle" class="music-floating-btn" title="Ligar/Desligar Música">
+        <span class="icon">🔊</span>
+    </button>
+
     <!-- Background Music -->
-    <audio id="bg-music" loop>
+    <audio id="bg-music" loop preload="auto">
         <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
     </audio>
 

@@ -55,6 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
             music.play().catch(e => console.log("Auto-play blocked, interaction needed"));
         }
 
+        // Mostrar botão flutuante de som
+        const musicToggle = document.getElementById('music-toggle');
+        if (musicToggle) musicToggle.style.display = 'flex';
+
         // Disparar Confetes
         if (typeof confetti === 'function') {
             confetti({
@@ -70,6 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.classList.add('opened');
             envelope.style.display = 'none';
             invitationContent.style.display = 'block';
+            
+            // Iniciar animações de scroll
+            initScrollAnimations();
+            
             window.scrollTo({
                 top: 0,
                 behavior: 'smooth'
@@ -201,6 +209,80 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+    // --- NOVAS FUNÇÕES ---
+
+    // Remover Loader
+    window.addEventListener('load', () => {
+        const loader = document.getElementById('loader');
+        if (loader) {
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.visibility = 'hidden', 800);
+            }, 1000);
+        }
+        initDynamicBg();
+    });
+
+    // Controle de Som Flutuante
+    const musicToggle = document.getElementById('music-toggle');
+    if (musicToggle) {
+        musicToggle.addEventListener('click', () => {
+            const music = document.getElementById('bg-music');
+            const icon = musicToggle.querySelector('.icon');
+            if (music.paused) {
+                music.play();
+                icon.textContent = '🔊';
+            } else {
+                music.pause();
+                icon.textContent = '🔇';
+            }
+        });
+    }
+
+    // Fundo Dinâmico (Partículas)
+    function initDynamicBg() {
+        const bg = document.getElementById('dynamic-bg');
+        if (!bg) return;
+        for (let i = 0; i < 15; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            const size = Math.random() * 5 + 2;
+            p.style.width = `${size}px`;
+            p.style.height = `${size}px`;
+            p.style.left = `${Math.random() * 100}%`;
+            p.style.animationDelay = `${Math.random() * 15}s`;
+            p.style.animationDuration = `${Math.random() * 10 + 10}s`;
+            bg.appendChild(p);
+        }
+    }
+
+    // Animações de Entrada (Scroll)
+    function initScrollAnimations() {
+        // Adicionar classe 'reveal' em seções importantes
+        const sections = [
+            '.countdown-container', 
+            '.gallery-section', 
+            '.map-section', 
+            '.rsvp-section',
+            '.btn-calendar'
+        ];
+        
+        sections.forEach(selector => {
+            const el = document.querySelector(selector);
+            if (el) el.classList.add('reveal');
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    }
 });
 
 // Função Global para Download do Calendário (Apple/Outlook)

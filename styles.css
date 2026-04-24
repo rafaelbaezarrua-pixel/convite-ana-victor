@@ -45,6 +45,123 @@ h3 {
     font-family: 'Playfair Display', serif;
 }
 
+/* --- NEW FEATURES --- */
+
+/* Preloader */
+.loader-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.8s ease, visibility 0.8s;
+}
+
+.loader-content {
+    text-align: center;
+}
+
+.loader-initials {
+    font-family: var(--font-secondary);
+    font-size: 3rem;
+    color: var(--primary);
+    margin-bottom: 20px;
+    letter-spacing: 5px;
+}
+
+.loader-bar {
+    width: 100px;
+    height: 2px;
+    background: #eee;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.loader-bar::after {
+    content: '';
+    position: absolute;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--primary);
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { left: -100%; }
+    50% { left: 0; }
+    100% { left: 100%; }
+}
+
+/* Floating Music Toggle */
+.music-floating-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--primary);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    z-index: 1000;
+    cursor: pointer;
+    display: none; /* Only show after open */
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.music-floating-btn:hover {
+    transform: scale(1.1);
+    background: #fff;
+}
+
+/* Dynamic Background */
+.dynamic-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    background: radial-gradient(circle, rgba(194, 166, 136, 0.4) 0%, rgba(194, 166, 136, 0) 70%);
+    border-radius: 50%;
+    animation: float 15s infinite linear;
+}
+
+@keyframes float {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+}
+
+/* Scroll Animations */
+.reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 1s ease-out;
+}
+
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 .container {
     width: 100%;
     max-width: 100%;
