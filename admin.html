@@ -394,10 +394,18 @@
                 .single();
             
             if (data) {
-                document.getElementById('photo-url-4').value = data.gallery_4 || '';
-                document.getElementById('invite-url').value = data.invite_url || '';
+                // Atualizar os labels com os nomes das fotos atuais
+                if(data.gallery_1) document.getElementById('path-1').textContent = "Atual: " + data.gallery_1.split('/').pop();
+                if(data.gallery_2) document.getElementById('path-2').textContent = "Atual: " + data.gallery_2.split('/').pop();
+                if(data.gallery_3) document.getElementById('path-3').textContent = "Atual: " + data.gallery_3.split('/').pop();
+                if(data.gallery_4) document.getElementById('path-4').textContent = "Atual: " + data.gallery_4.split('/').pop();
                 
-                document.getElementById('music-path').textContent = data.music_url ? "Atual: " + data.music_url.split('/').pop() : "";
+                // Atualizar o link do convite
+                const inviteUrlInput = document.getElementById('invite-url');
+                if(inviteUrlInput) inviteUrlInput.value = data.invite_url || '';
+                
+                // Atualizar o status da música
+                if(data.music_url) document.getElementById('music-path').textContent = "Atual: " + data.music_url.split('/').pop();
                 document.getElementById('music-enabled').checked = data.music_enabled !== false;
 
                 window.currentGalleryUrls = data;
