@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Supabase Configuration
     // Initialize countdown if elements exist
     if (document.getElementById('days')) {
-        const weddingDate = new Date('2026-11-21T16:00:00').getTime();
+        const weddingDate = new Date('2026-11-21T16:00:00-03:00').getTime();
 
         const countdownInterval = setInterval(() => {
             const now = new Date().getTime();

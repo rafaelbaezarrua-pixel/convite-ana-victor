@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Countdown Logic
     if (document.getElementById('days')) {
-        const weddingDate = new Date('2026-11-21T16:00:00').getTime();
+        const weddingDate = new Date('2026-11-21T16:00:00-03:00').getTime();
 
         const countdownInterval = setInterval(() => {
             const now = new Date().getTime();
