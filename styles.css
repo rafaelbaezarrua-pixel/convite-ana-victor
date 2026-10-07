@@ -862,30 +862,70 @@ th {
 }
 
 /* Print Styles */
-@media print {
+#print-report {
+    display: none;
+}
 
-    .btn-delete,
-    .btn-report,
-    .admin-header h1,
-    .no-print {
+@media print {
+    .admin-container > :not(#print-report) {
         display: none !important;
     }
 
     .admin-container {
+        display: block !important;
         box-shadow: none !important;
         margin: 0 !important;
         width: 100% !important;
         max-width: none !important;
     }
 
-    .accordion-content {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 5px;
+    #print-report {
+        display: block !important;
+        color: #222;
     }
 
-    .accordion-header::after {
-        display: none;
+    #print-report h1 {
+        margin-bottom: 4px;
+        font-size: 22pt;
+    }
+
+    .print-report-summary {
+        margin-bottom: 18px;
+        color: #555;
+    }
+
+    .print-guest-group {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        margin-bottom: 14px;
+        padding: 12px 14px;
+        border: 1px solid #bbb;
+        border-left: 4px solid #777;
+    }
+
+    .print-guest-group h2 {
+        margin: 0 0 8px;
+        font-size: 13pt;
+    }
+
+    .print-guest-group h3 {
+        margin: 8px 0 4px;
+        font-size: 10pt;
+    }
+
+    .print-guest-group p,
+    .print-guest-group ul {
+        margin: 3px 0;
+        font-size: 10pt;
+    }
+
+    .print-guest-group ul {
+        padding-left: 20px;
+    }
+
+    .print-confirmed-at {
+        color: #666;
+        font-size: 9pt !important;
     }
 
     body {
@@ -903,7 +943,8 @@ th {
 /* Media query for mobile adjustments */
 @media (max-width: 768px) {
     .admin-container {
-        padding: 20px 15px;
+        width: 100%;
+        padding: 18px 12px;
     }
 
     .admin-header {
@@ -913,85 +954,148 @@ th {
     }
 
     .admin-header h1 {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
     }
 
     .admin-actions {
         width: 100%;
-        gap: 10px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
     }
 
     .admin-actions button {
-        flex: 1;
-        min-width: 140px;
+        width: 100%;
+        min-width: 0;
         justify-content: center;
         font-size: 0.8rem;
-        padding: 8px 12px;
+        padding: 9px 6px;
+    }
+
+    .admin-actions button:last-child {
+        grid-column: 1 / -1;
     }
 
     .stats-grid {
-        grid-template-columns: 1fr;
-        gap: 10px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 18px;
+    }
+
+    .stat-card {
+        min-width: 0;
+        padding: 14px 12px;
+    }
+
+    .stat-card:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .stat-card p {
+        font-size: 1.5rem;
+    }
+
+    .search-box {
+        max-width: none;
+        margin-bottom: 14px;
     }
 
     /* Responsive Table to Cards */
-    table, thead, tbody, th, td, tr {
+    .admin-container table,
+    .admin-container tbody {
         display: block;
+        width: 100%;
     }
 
-    thead tr {
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
+    .admin-container thead {
+        display: none;
     }
 
-    tr {
-        border: 1px solid #eee;
-        border-radius: 12px;
-        margin-bottom: 15px;
+    .admin-container tbody tr {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px 10px;
+        margin: 0 0 12px;
+        padding: 14px;
+        border: 1px solid #e8e8e8;
+        border-radius: 10px;
         background: white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-        padding: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     }
 
-    td {
-        border: none;
-        border-bottom: 1px solid #f9f9f9;
-        position: relative;
-        padding-left: 40% !important;
-        text-align: right !important;
-        min-height: 45px;
+    .admin-container tbody td {
         display: flex;
-        align-items: center;
-        justify-content: flex-end;
+        min-width: 0;
+        min-height: 0;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 0 !important;
+        border: 0;
+        text-align: left !important;
+        overflow-wrap: anywhere;
     }
 
-    td:last-child {
-        border-bottom: 0;
+    .admin-container tbody td:before {
+        position: static;
+        width: auto;
+        padding: 0;
+        margin-bottom: 3px;
+        white-space: normal;
+        color: #777;
+        font-size: 0.72rem;
+        content: attr(data-label);
+    }
+
+    .admin-container tbody td:first-child,
+    .admin-container tbody td:nth-child(3),
+    .admin-container tbody td:last-child,
+    .admin-container tbody td[colspan] {
+        grid-column: 1 / -1;
+    }
+
+    .admin-container tbody td:first-child {
+        font-size: 1rem;
+    }
+
+    .admin-container tbody td:last-child {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-top: 10px !important;
+        border-top: 1px solid #eee;
+    }
+
+    .admin-container tbody td:last-child:before {
+        flex-basis: 100%;
+    }
+
+    .admin-container tbody td:last-child button {
+        flex: 1 1 90px;
+        width: auto;
+        min-height: 38px;
         justify-content: center;
-        padding-left: 10px !important;
-        text-align: center !important;
-        gap: 10px;
+        margin: 0;
     }
 
-    td:before {
-        position: absolute;
-        left: 10px;
-        width: 35%;
-        padding-right: 10px;
-        white-space: nowrap;
-        text-align: left;
-        font-weight: 600;
-        color: #888;
-        font-size: 0.8rem;content: attr(data-label);
+    .admin-container tbody td[colspan] {
+        align-items: center;
+        padding: 18px 8px !important;
     }
 
     .accordion-header {
-        justify-content: flex-end;
+        justify-content: flex-start;
+        width: 100%;
     }
 
     .accordion-content {
+        width: 100%;
         text-align: left;
+    }
+
+    .companion-tag {
+        justify-content: flex-start;
+        overflow-wrap: anywhere;
     }
 
     .modal-content {
@@ -1016,6 +1120,7 @@ th {
     
     .admin-actions button {
         width: 100%;
-        flex: none;
+        min-width: 0;
+        flex: initial;
     }
 }

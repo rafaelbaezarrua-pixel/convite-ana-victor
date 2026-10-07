@@ -10,6 +10,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="favicon.png?v=2">
     <link rel="apple-touch-icon" href="favicon.png?v=2">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         body {
             background-color: #f5f5f5;
@@ -169,14 +170,19 @@
                 <button class="btn-report" onclick="openSettingsModal()" style="background-color: #34495e;">
                     <span>⚙️</span> Configurações
                 </button>
-                <button class="btn-report" onclick="window.print()">
+                <button class="btn-report" onclick="printGuestReport()">
                     <span>📄</span> Gerar Relatório
+                </button>
+                <button class="btn-report" onclick="exportExcel()" style="background-color: #217346;">
+                    <span>📊</span> Exportar Excel
                 </button>
                 <button class="btn-delete" style="padding: 8px 15px; font-size: 0.9rem;" onclick="handleLogout()">
                     <span>🚪</span> Sair
                 </button>
             </div>
         </div>
+
+        <section id="print-report" aria-hidden="true"></section>
 
         <!-- Stats Section -->
         <div class="stats-grid">
@@ -386,6 +392,73 @@
                     row.style.display = 'none';
                 }
             });
+        }
+
+        function getReportGroups() {
+            return (window.allRSVPs || []).map((rsvp, index) => ({
+                number: index + 1,
+                guest: getGuestDetails(rsvp.name, rsvp.age),
+                companions: (rsvp.companions || []).map(getCompanionDetails),
+                confirmedAt: rsvp.created_at ? new Date(rsvp.created_at).toLocaleString('pt-BR') : ''
+            }));
+        }
+
+        function printGuestReport() {
+            const report = document.getElementById('print-report');
+            const groups = getReportGroups();
+            report.innerHTML = `
+                <h1>Lista de Presença</h1>
+                <p class="print-report-summary">${groups.length} convite(s) · ${groups.reduce((total, group) => total + 1 + group.companions.length, 0)} pessoas</p>
+                ${groups.map(group => `
+                    <section class="print-guest-group">
+                        <h2>Convite ${group.number}: ${escapeHtml(group.guest.name)}</h2>
+                        <p><strong>Titular:</strong> ${escapeHtml(group.guest.name)}${group.guest.age !== '' ? ` · ${group.guest.age} ${Number(group.guest.age) === 1 ? 'ano' : 'anos'}` : ''}</p>
+                        <h3>Acompanhantes (${group.companions.length})</h3>
+                        ${group.companions.length ? `
+                            <ul>${group.companions.map(companion => `
+                                <li>${escapeHtml(companion.name)}${companion.age !== '' ? ` · ${companion.age} ${Number(companion.age) === 1 ? 'ano' : 'anos'}` : ''}</li>
+                            `).join('')}</ul>
+                        ` : '<p>Nenhum acompanhante</p>'}
+                        <p class="print-confirmed-at">Confirmação: ${escapeHtml(group.confirmedAt)}</p>
+                    </section>
+                `).join('')}
+            `;
+            report.setAttribute('aria-hidden', 'false');
+            window.addEventListener('afterprint', () => {
+                report.innerHTML = '';
+                report.setAttribute('aria-hidden', 'true');
+            }, { once: true });
+            window.print();
+        }
+
+        function exportExcel() {
+            if (typeof XLSX === 'undefined') {
+                alert('Não foi possível carregar o exportador Excel. Verifique sua conexão e tente novamente.');
+                return;
+            }
+
+            const rows = [['Grupo do convite', 'Tipo', 'Nome', 'Idade', 'Data de confirmação']];
+            getReportGroups().forEach(group => {
+                const groupLabel = `Convite ${group.number} - ${group.guest.name}`;
+                rows.push([groupLabel, 'Titular', group.guest.name, group.guest.age, group.confirmedAt]);
+                group.companions.forEach(companion => {
+                    rows.push([groupLabel, 'Acompanhante', companion.name, companion.age, group.confirmedAt]);
+                });
+            });
+
+            const worksheet = XLSX.utils.aoa_to_sheet(rows);
+            worksheet['!cols'] = [
+                { wch: 36 },
+                { wch: 18 },
+                { wch: 32 },
+                { wch: 12 },
+                { wch: 24 }
+            ];
+            worksheet['!autofilter'] = { ref: worksheet['!ref'] };
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Convidados');
+            XLSX.writeFile(workbook, `lista-de-convidados-${new Date().toISOString().slice(0, 10)}.xlsx`);
         }
 
         let currentEditId = null;
