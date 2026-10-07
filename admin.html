@@ -110,8 +110,12 @@
         async function checkSession() {
             const { data: { session } } = await _supabase.auth.getSession();
             if (session) {
-                document.getElementById('login-overlay').style.display = 'none';
-                document.querySelector('.admin-container').style.display = 'block';
+                const loginOverlay = document.getElementById('login-overlay');
+                const adminContainer = document.querySelector('.admin-container');
+                if (!loginOverlay || !adminContainer) return;
+
+                loginOverlay.style.display = 'none';
+                adminContainer.style.display = 'block';
                 renderRSVPs();
             }
         }
