@@ -199,6 +199,7 @@
             <thead>
                 <tr>
                     <th>Nome do Convidado</th>
+                    <th>Idade</th>
                     <th>Acompanhantes</th>
                     <th>Data de Confirmação</th>
                     <th>Total no Convidados</th>
@@ -218,6 +219,10 @@
             <div class="form-group">
                 <label>Nome do Titular</label>
                 <input type="text" id="edit-guest-name" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="edit-guest-age">Idade do Titular</label>
+                <input type="number" id="edit-guest-age" class="form-control" min="0" max="120">
             </div>
             <div id="edit-companions-container">
                 <!-- Companion fields will be added here -->
@@ -300,7 +305,7 @@
 
             if (error) {
                 console.error('Erro completo do Supabase:', error);
-                tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 40px; color: red;">
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 40px; color: red;">
                     Erro ao carregar dados: ${error.message || 'Verifique as chaves e as permissões RLS no Supabase.'}
                 </td></tr>`;
                 return;
@@ -310,7 +315,7 @@
             window.allRSVPs = rsvps; // Store globally for editing
 
             if (!rsvps || rsvps.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px;">Nenhuma confirmação até o momento.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px;">Nenhuma confirmação até o momento.</td></tr>';
                 if (document.getElementById('stat-titulares')) document.getElementById('stat-titulares').textContent = '0';
                 if (document.getElementById('stat-acompanhantes')) document.getElementById('stat-acompanhantes').textContent = '0';
                 if (document.getElementById('stat-geral')) document.getElementById('stat-geral').textContent = '0';
@@ -323,6 +328,8 @@
                 const companionCount = rsvp.companions ? rsvp.companions.length : 0;
                 totalAcompanhantes += companionCount;
                 const groupTotal = 1 + companionCount;
+                const guest = getGuestDetails(rsvp.name, rsvp.age);
+                const companions = (rsvp.companions || []).map(getCompanionDetails);
 
                 const row = document.createElement('tr');
 
@@ -334,9 +341,9 @@
                             ${rsvp.companions.length} acompanhante(s)
                         </div>
                         <div class="accordion-content">
-                            ${rsvp.companions.map((c, cIndex) => `
+                            ${companions.map(companion => `
                                 <span class="companion-tag">
-                                    ${c} 
+                                    ${escapeHtml(companion.name)}${companion.age !== '' ? ` (${companion.age} ${Number(companion.age) === 1 ? 'ano' : 'anos'})` : ''}
                                 </span>`).join('')}
                         </div>
                     `;
@@ -347,7 +354,8 @@
                 const dateDisplay = new Date(rsvp.created_at).toLocaleString('pt-BR');
 
                 row.innerHTML = `
-                    <td data-label="Nome do Convidado" style="font-weight: 600;">${rsvp.name}</td>
+                    <td data-label="Nome do Convidado" style="font-weight: 600;">${escapeHtml(guest.name)}</td>
+                    <td data-label="Idade">${guest.age !== '' ? `${guest.age} ${Number(guest.age) === 1 ? 'ano' : 'anos'}` : '<span style="color: #999;">Não informada</span>'}</td>
                     <td data-label="Acompanhantes">${companionsHtml}</td>
                     <td data-label="Data de Confirmação">${dateDisplay}</td>
                     <td data-label="Total no Convidados" style="text-align: center; font-weight: 700;">${groupTotal}</td>
@@ -490,14 +498,17 @@
 
         function openEditModal(index) {
             const rsvp = window.allRSVPs[index];
+            const guest = getGuestDetails(rsvp.name, rsvp.age);
             currentEditId = rsvp.id;
-            document.getElementById('edit-guest-name').value = rsvp.name;
+            document.getElementById('edit-guest-name').value = guest.name;
+            document.getElementById('edit-guest-age').value = guest.age;
             const container = document.getElementById('edit-companions-container');
             container.innerHTML = '<h4 style="margin-top: 20px; margin-bottom: 10px;">Acompanhantes</h4>';
 
             if (rsvp.companions && rsvp.companions.length > 0) {
-                rsvp.companions.forEach((comp, idx) => {
-                    addCompanionField(comp);
+                rsvp.companions.forEach(comp => {
+                    const companion = getCompanionDetails(comp);
+                    addCompanionField(companion.name, companion.age);
                 });
             }
 
@@ -510,20 +521,41 @@
             addBtn.style.width = 'auto';
             addBtn.style.background = '#3498db';
             addBtn.id = 'add-companion-btn';
-            addBtn.onclick = () => addCompanionField('');
+            addBtn.onclick = () => addCompanionField();
             container.appendChild(addBtn);
 
             document.getElementById('edit-modal').style.display = 'flex';
         }
 
-        function addCompanionField(value) {
+        function addCompanionField(name = '', age = '') {
             const container = document.getElementById('edit-companions-container');
             const div = document.createElement('div');
             div.className = 'companion-edit-row';
-            div.innerHTML = `
-                <input type="text" value="${value}" class="form-control edit-comp-input" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                <button class="btn-delete" style="padding: 5px 10px; background: #e74c3c;" onclick="this.parentElement.remove()">×</button>
-            `;
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.value = name;
+            nameInput.className = 'form-control edit-comp-input';
+            nameInput.setAttribute('aria-label', 'Nome do acompanhante');
+            nameInput.style.cssText = 'flex: 1; min-width: 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px;';
+
+            const ageInput = document.createElement('input');
+            ageInput.type = 'number';
+            ageInput.value = age;
+            ageInput.min = '0';
+            ageInput.max = '120';
+            ageInput.className = 'form-control edit-comp-age';
+            ageInput.setAttribute('aria-label', 'Idade do acompanhante');
+            ageInput.style.cssText = 'width: 90px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;';
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'btn-delete';
+            removeButton.textContent = '×';
+            removeButton.setAttribute('aria-label', 'Remover acompanhante');
+            removeButton.style.cssText = 'padding: 5px 10px; background: #e74c3c;';
+            removeButton.addEventListener('click', () => div.remove());
+
+            div.append(nameInput, ageInput, removeButton);
             // Insert before the "Add" button if it exists
             const addBtn = container.querySelector('#add-companion-btn');
             container.insertBefore(div, addBtn);
@@ -535,12 +567,20 @@
 
         async function saveEdits() {
             const newName = document.getElementById('edit-guest-name').value;
-            const compInputs = document.querySelectorAll('.edit-comp-input');
-            const newCompanions = Array.from(compInputs).map(input => input.value).filter(val => val.trim() !== '');
+            const newAgeValue = document.getElementById('edit-guest-age').value;
+            const companionRows = document.querySelectorAll('.companion-edit-row');
+            const newCompanions = Array.from(companionRows).map(row => ({
+                name: row.querySelector('.edit-comp-input').value.trim(),
+                age: row.querySelector('.edit-comp-age').value === '' ? null : Number(row.querySelector('.edit-comp-age').value)
+            })).filter(companion => companion.name !== '');
 
             const { error } = await _supabase
                 .from('rsvps')
-                .update({ name: newName, companions: newCompanions })
+                .update({
+                    name: newName.trim(),
+                    age: newAgeValue === '' ? null : Number(newAgeValue),
+                    companions: newCompanions
+                })
                 .eq('id', currentEditId);
 
             if (error) {
@@ -549,6 +589,34 @@
                 closeModal();
                 renderRSVPs();
             }
+        }
+
+        function getGuestDetails(name, age) {
+            let cleanName = name || '';
+            let cleanAge = age ?? '';
+            const legacyAge = typeof cleanName === 'string' ? cleanName.match(/\s+\((\d+) anos?\)$/) : null;
+            if (cleanAge === '' && legacyAge) {
+                cleanAge = Number(legacyAge[1]);
+                cleanName = cleanName.slice(0, legacyAge.index);
+            }
+            return { name: cleanName, age: cleanAge };
+        }
+
+        function getCompanionDetails(companion) {
+            if (companion && typeof companion === 'object' && !Array.isArray(companion)) {
+                return getGuestDetails(companion.name, companion.age);
+            }
+            return getGuestDetails(companion, '');
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, character => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            })[character]);
         }
 
         function toggleAccordion(element) {

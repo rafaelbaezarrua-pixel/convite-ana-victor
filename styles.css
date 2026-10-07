@@ -362,7 +362,8 @@ label {
     color: var(--text-color);
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="number"] {
     width: 100%;
     padding: 12px 15px;
     border: 1px solid #ddd;
@@ -371,7 +372,8 @@ input[type="text"] {
     transition: var(--transition-medium);
 }
 
-input[type="text"]:focus {
+input[type="text"]:focus,
+input[type="number"]:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.1);
@@ -415,6 +417,15 @@ input[type="text"]:focus {
     gap: 10px;
     margin-bottom: 10px;
     align-items: center;
+}
+
+.companion-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.companion-age-input {
+    flex: 0 0 100px;
 }
 
 .remove-companion {

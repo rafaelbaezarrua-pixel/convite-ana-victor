@@ -93,7 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
         companionDiv.id = `companion-${companionId}`;
         
         companionDiv.innerHTML = `
-            <input type="text" placeholder="Nome do acompanhante" class="companion-input" required>
+            <input type="text" placeholder="Nome do acompanhante" class="companion-input" aria-label="Nome do acompanhante" required>
+            <input type="number" min="0" max="120" placeholder="Idade" class="companion-age-input" aria-label="Idade do acompanhante" required>
             <button type="button" class="remove-companion" title="Remover">×</button>
         `;
         
@@ -113,12 +114,17 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Enviando...';
 
-        const guestName = document.getElementById('guest-name').value;
+        const guestName = document.getElementById('guest-name').value.trim();
+        const guestAge = Number(document.getElementById('guest-age').value);
         const companionInputs = document.querySelectorAll('.companion-input');
-        const companions = Array.from(companionInputs).map(input => input.value);
+        const companions = Array.from(companionInputs).map(input => {
+            const age = input.closest('.companion-item').querySelector('.companion-age-input').value;
+            return { name: input.value.trim(), age: Number(age) };
+        });
 
         const rsvpData = {
             name: guestName,
+            age: guestAge,
             companions: companions
         };
 
