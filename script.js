@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const rsvpForm = document.getElementById('rsvp-form');
     const addCompanionBtn = document.getElementById('add-companion');
     const companionsContainer = document.getElementById('companions-container');
+    const linkedEditToken = new URLSearchParams(window.location.hash.slice(1)).get('edit');
+    let activeEditToken = null;
 
     // Supabase Configuration
     // Initialize countdown if elements exist
@@ -86,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 2. Add Companion Logic
-    addCompanionBtn.addEventListener('click', () => {
+    function addCompanionInput(name = '', age = '') {
         const companionId = Date.now();
         const companionDiv = document.createElement('div');
         companionDiv.className = 'companion-item';
@@ -97,6 +99,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <input type="number" min="0" max="120" placeholder="Idade" class="companion-age-input" aria-label="Idade do acompanhante" required>
             <button type="button" class="remove-companion" title="Remover">×</button>
         `;
+
+        companionDiv.querySelector('.companion-input').value = name;
+        companionDiv.querySelector('.companion-age-input').value = age;
         
         companionsContainer.appendChild(companionDiv);
 
@@ -104,7 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
         companionDiv.querySelector('.remove-companion').addEventListener('click', () => {
             companionDiv.remove();
         });
-    });
+    }
+
+    addCompanionBtn.addEventListener('click', () => addCompanionInput());
 
     // 3. Form Submission
     rsvpForm.addEventListener('submit', async (e) => {
@@ -128,21 +135,41 @@ document.addEventListener('DOMContentLoaded', () => {
             companions: companions
         };
 
-        // Save to Supabase
-        const { error } = await _supabase
-            .from('rsvps')
-            .insert([rsvpData]);
+        const isEditing = Boolean(activeEditToken);
+        let error;
+        if (isEditing) {
+            ({ error } = await _supabase.rpc('update_rsvp_with_edit_token', {
+                p_edit_token: activeEditToken,
+                p_name: rsvpData.name,
+                p_age: rsvpData.age,
+                p_companions: rsvpData.companions
+            }));
+        } else {
+            const editToken = crypto.randomUUID();
+            ({ error } = await _supabase
+                .from('rsvps')
+                .insert([{ ...rsvpData, edit_token: editToken }]));
+            if (!error) activeEditToken = editToken;
+        }
 
         if (error) {
             console.error('Error saving to Supabase:', error);
-            alert('Erro ao confirmar presença. Por favor, tente novamente.');
+            alert(isEditing ? 'Erro ao atualizar a presença. Por favor, tente novamente.' : 'Erro ao confirmar presença. Por favor, tente novamente.');
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Confirmar Presença';
+            submitBtn.textContent = isEditing ? 'Salvar alterações' : 'Confirmar Presença';
             return;
         }
 
         // Mark as confirmed for this device
         localStorage.setItem('rsvp_confirmed', 'true');
+        localStorage.setItem('rsvp_edit_token', activeEditToken);
+
+        if (isEditing) {
+            alert('Presença atualizada com sucesso!');
+            history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+            renderRSVPStatus();
+            return;
+        }
 
         alert('Presença confirmada com sucesso! Você será redirecionado para a lista de presentes.');
         
@@ -151,18 +178,88 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function renderRSVPStatus() {
-        if (localStorage.getItem('rsvp_confirmed')) {
-            const rsvpSection = document.querySelector('.rsvp-section');
-            if (rsvpSection) {
-                rsvpSection.innerHTML = `
-                    <div style="text-align: center; padding: 20px; background: #f9f9f9; border-radius: 12px; border: 1px solid var(--primary);">
-                        <h3 style="color: var(--primary); margin-bottom: 10px;">Presença já Confirmada!</h3>
-                        <p>Obrigado por confirmar sua presença. Mal podemos esperar para celebrar com você!</p>
-                        <a href="${GIFT_LIST_URL}" class="btn" style="display: inline-block; margin-top: 20px; text-decoration: none;">Ver Lista de Presentes</a>
-                    </div>
-                `;
-            }
+        const rsvpSection = document.querySelector('.rsvp-section');
+        const form = document.getElementById('rsvp-form');
+        if (!rsvpSection || !form) return;
+
+        let status = rsvpSection.querySelector('.rsvp-status-message');
+        if (!localStorage.getItem('rsvp_confirmed')) {
+            form.style.display = '';
+            status?.remove();
+            return;
         }
+
+        form.style.display = 'none';
+        if (!status) {
+            status = document.createElement('div');
+            status.className = 'rsvp-status-message';
+            status.style.cssText = 'text-align: center; padding: 20px; background: #f9f9f9; border-radius: 12px; border: 1px solid var(--primary);';
+            status.innerHTML = `
+                <h3 style="color: var(--primary); margin-bottom: 10px;">Presença já Confirmada!</h3>
+                <p>Obrigado por confirmar sua presença. Mal podemos esperar para celebrar com você!</p>
+                <button type="button" class="btn" id="edit-presence-button" style="display: inline-block; margin-top: 12px; width: auto; padding: 12px 30px;">Editar presença</button>
+                <p style="font-size: 0.85rem; color: #777; margin-top: 12px;">Confirmações antigas precisam do link individual de edição enviado pelo administrador.</p>
+                <a href="${GIFT_LIST_URL}" class="btn" style="display: inline-block; margin-top: 8px; text-decoration: none;">Ver Lista de Presentes</a>
+            `;
+            rsvpSection.appendChild(status);
+        }
+
+        status.querySelector('#edit-presence-button').onclick = async () => {
+            let token = localStorage.getItem('rsvp_edit_token');
+            if (!token) {
+                const suppliedValue = prompt('Cole aqui seu link ou código individual de edição:');
+                token = extractEditToken(suppliedValue);
+            }
+            if (token) await loadRSVPForEditing(token);
+        };
+    }
+
+    function extractEditToken(value) {
+        const match = String(value || '').match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+        return match ? match[0] : null;
+    }
+
+    function getGuestDetails(name, age) {
+        let cleanName = name || '';
+        let cleanAge = age ?? '';
+        const legacyAge = typeof cleanName === 'string' ? cleanName.match(/\s+\((\d+) anos?\)$/) : null;
+        if (cleanAge === '' && legacyAge) {
+            cleanAge = Number(legacyAge[1]);
+            cleanName = cleanName.slice(0, legacyAge.index);
+        }
+        return { name: cleanName, age: cleanAge };
+    }
+
+    function getCompanionDetails(companion) {
+        return companion && typeof companion === 'object'
+            ? getGuestDetails(companion.name, companion.age)
+            : getGuestDetails(companion, '');
+    }
+
+    async function loadRSVPForEditing(token) {
+        const { data, error } = await _supabase.rpc('get_rsvp_for_edit', { p_edit_token: token });
+        const rsvpSection = document.querySelector('.rsvp-section');
+        if (error || !data) {
+            console.error('Error loading RSVP for editing:', error);
+            rsvpSection.innerHTML = '<div style="text-align:center;padding:24px;"><h3>Link de edição inválido</h3><p>Peça ao administrador um novo link individual.</p></div>';
+            return;
+        }
+
+        activeEditToken = token;
+        rsvpSection.querySelector('.rsvp-status-message')?.remove();
+        rsvpForm.style.display = '';
+        rsvpSection.querySelector('h2').textContent = 'Editar presença';
+        rsvpSection.querySelector('p').textContent = 'Atualize seus dados e os de seus acompanhantes.';
+
+        const guest = getGuestDetails(data.name, data.age);
+        document.getElementById('guest-name').value = guest.name;
+        document.getElementById('guest-age').value = guest.age;
+        companionsContainer.innerHTML = '';
+        (data.companions || []).map(getCompanionDetails).forEach(companion => {
+            addCompanionInput(companion.name, companion.age);
+        });
+        rsvpForm.querySelector('button[type="submit"]').textContent = 'Salvar alterações';
+        rsvpSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     async function loadGallerySettings() {
@@ -198,7 +295,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Call this to handle initial state
-    renderRSVPStatus();
+    if (linkedEditToken) loadRSVPForEditing(linkedEditToken);
+    else renderRSVPStatus();
     loadGallerySettings();
 
     // Pausar música ao sair da aba/navegador

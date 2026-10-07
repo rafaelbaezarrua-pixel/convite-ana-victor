@@ -364,6 +364,7 @@
                     <td data-label="Total no Convidados" style="text-align: center; font-weight: 700;">${groupTotal}</td>
                     <td data-label="Ações" class="no-print">
                         <button class="btn-report" style="padding: 5px 10px; font-size: 0.8rem; background-color: #f39c12;" onclick="openEditModal(${index})">Editar</button>
+                        <button class="btn-report" style="padding: 5px 10px; font-size: 0.8rem; background-color: #217346;" onclick="copyEditLink(${index})">Link de edição</button>
                         <button class="btn-delete" style="padding: 5px 10px; font-size: 0.8rem;" onclick="deleteRSVP(${rsvp.id})">Excluir</button>
                     </td>
                 `;
@@ -564,6 +565,24 @@
             // Usar api.whatsapp.com para maior compatibilidade com celular
             const whatsappUrl = `https://api.whatsapp.com/send?text=${message}`;
             window.location.href = whatsappUrl;
+        }
+
+        async function copyEditLink(index) {
+            const rsvp = window.allRSVPs[index];
+            if (!rsvp?.edit_token) {
+                alert('Execute a migração SQL de edição e recarregue a lista para gerar os links.');
+                return;
+            }
+
+            const editUrl = new URL('confirmar.html', window.location.href);
+            editUrl.hash = `edit=${rsvp.edit_token}`;
+
+            try {
+                await navigator.clipboard.writeText(editUrl.href);
+                alert('Link individual copiado. Envie-o diretamente ao titular deste convite.');
+            } catch (error) {
+                window.prompt('Copie e envie este link individual ao titular:', editUrl.href);
+            }
         }
 
         function openEditModal(index) {
